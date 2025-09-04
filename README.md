@@ -1,3 +1,7 @@
+Contract address deployed 
+https://sepolia.etherscan.io/tx/0x27193dfd5f0af28a3aeda95e23b7047736832af72271625939364a3faaa38976
+
+https://eth-sepolia.blockscout.com/tx/0x27193dfd5f0af28a3aeda95e23b7047736832af72271625939364a3faaa38976
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
