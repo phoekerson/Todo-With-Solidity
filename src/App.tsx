@@ -1,35 +1,104 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
+import { getContract } from "./utils/contract";
+
+interface Task {
+  id: number;
+  description: string;
+  completed: boolean;
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskId, setTaskId] = useState("");
+  const [task, setTask] = useState<Task | null>(null);
+
+  const createTask = async () => {
+    try {
+      const contract = await getContract();
+      const tx = await contract.createTask(taskDescription);
+      await tx.wait();
+      alert("Task created!");
+      setTaskDescription("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getTask = async () => {
+    try {
+      const contract = await getContract();
+      const t = await contract.getTask(Number(taskId));
+      setTask({
+        id: Number(t[0]),
+        description: t[1],
+        completed: t[2],
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const completeTask = async () => {
+    try {
+      const contract = await getContract();
+      const tx = await contract.completeTask(Number(taskId));
+      await tx.wait();
+      alert("Task completed!");
+      getTask();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateTask = async () => {
+    try {
+      const contract = await getContract();
+      const tx = await contract.updateTask(Number(taskId), taskDescription);
+      await tx.wait();
+      alert("Task updated!");
+      getTask();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
-    <>
+    <div style={{ padding: 20 }}>
+      <h1>ToDo Dapp</h1>
+
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <input
+          type="text"
+          placeholder="Task description"
+          value={taskDescription}
+          onChange={(e) => setTaskDescription(e.target.value)}
+        />
+        <button onClick={createTask}>Create Task</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+      <div style={{ marginTop: 20 }}>
+        <input
+          type="number"
+          placeholder="Task ID"
+          value={taskId}
+          onChange={(e) => setTaskId(e.target.value)}
+        />
+        <button onClick={getTask}>Get Task</button>
+        <button onClick={completeTask}>Complete Task</button>
+        <button onClick={updateTask}>Update Task</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+      {task && (
+        <div style={{ marginTop: 20 }}>
+          <h3>Task #{task.id}</h3>
+          <p>Description: {task.description}</p>
+          <p>Status: {task.completed ? "✅ Completed" : "❌ Not completed"}</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default App
